@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Chivasky - Liquid Glass Enterprise</title>
+    <!-- Fonts for Luxury & Modern Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@200;300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* === DYNAMIC LIQUID GLASS VARIABLES === */
+        :root {
+            /* Tông màu Midnight Gold - Kính lỏng */
+            --bg-color-1: #050508;
+            --bg-color-2: #11141c;
+            --liquid-blob-1: rgba(212, 175, 55, 0.15); /* Vàng Gold */
+            --liquid-blob-2: rgba(90, 40, 150, 0.15);  /* Tím đậm */
+            --liquid-blob-3: rgba(0, 80, 120, 0.15);   /* Xanh biển */
+
+            --accent-primary: #D4AF37;
+            --accent-secondary: #F8E9A1;
+            
+            --text-main: #ffffff;
+            --text-muted: #aab4be;
+            --text-dark: #0a0a0a;
+            
+            /* Thông số Liquid Glass (Kính lỏng) */
+            --glass-bg: rgba(20, 25, 35, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-highlight: rgba(255, 255, 255, 0.15);
+            --glass-shadow: rgba(0, 0, 0, 0.4);
+            --glass-blur: blur(24px) saturate(150%);
+            
+            --font-heading: 'Playfair Display', serif;
+            --font-brand: 'Cinzel', serif;
+            --font-body: 'Montserrat', sans-serif;
+            --font-tech: 'Orbitron', sans-serif;
+            
+            --transition-smooth: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            --border-radius: 20px;
+        }
+
+        /* Light Corporate Liquid Theme */
+        body.theme-light {
+            --bg-color-1: #eef2f5;
+            --bg-color-2: #e0e5ec;
+            --liquid-blob-1: rgba(0, 71, 171, 0.15); /* Xanh Cobalt */
+            --liquid-blob-2: rgba(0, 150, 255, 0.15);
+            --liquid-blob-3: rgba(180, 200, 255, 0.3);
+
+            --accent-primary: #0047AB; 
+            --accent-secondary: #6699CC;
+            
+            --text-main: #1a2530;
+            --text-muted: #6b7c8a;
+            --text-dark: #ffffff;
+            
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-highlight: rgba(255, 255, 255, 0.8);
+            --glass-shadow: rgba(0, 71, 171, 0.05);
+        }
+
+        /* Platinum/Silver Liquid Theme */
+        body.theme-platinum {
+            --bg-color-1: #151517;
+            --bg-color-2: #252528;
+            --liquid-blob-1: rgba(226, 226, 182, 0.1); 
+            --liquid-blob-2: rgba(255, 255, 255, 0.05);
+            --liquid-blob-3: rgba(100, 100, 100, 0.2);
+
+            --accent-primary: #E2E2B6; 
+            --accent-secondary: #FFFFFF;
+            
+            --glass-bg: rgba(40, 40, 45, 0.4);
+            --glass-border: rgba(226, 226, 182, 0.15);
+            --glass-highlight: rgba(226, 226, 182, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            z-index: 0;
+            transition: background 1s ease;
+        }
+
+        body::-webkit-scrollbar { width: 4px; }
+        body::-webkit-scrollbar-track { background: transparent; }
+        body::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 10px; }
+
+        /* === LIQUID BACKGROUND BLOBS === */
+        /* Tạo hiệu ứng chất lỏng di chuyển mờ ảo phía sau kính */
+        .liquid-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            overflow: hidden; z-index: -1; pointer-events: none;
+        }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(90px);
+            animation: moveBlob 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .blob-1 {
+            width: 60vw; height: 60vw; background: var(--liquid-blob-1);
+            top: -20%; left: -10%; animation-delay: 0s;
+        }
+        .blob-2 {
+            width: 50vw; height: 50vw; background: var(--liquid-blob-2);
+            bottom: -10%; right: -10%; animation-delay: -5s; animation-direction: alternate-reverse;
+        }
+        .blob-3 {
+            width: 40vw; height: 40vw; background: var(--liquid-blob-3);
+            top: 30%; left: 40%; animation-duration: 30s;
+        }
+
+        @keyframes moveBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(10vw, -10vh) scale(1.1); }
+            66% { transform: translate(-10vw, 15vh) scale(0.9); }
+            100% { transform: translate(5vw, 5vh) scale(1); }
+        }
+
+        /* === LOADER === */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color-1); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s ease, visibility 1s ease;
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+        .liquid-loader {
+            width: 80px; height: 80px; position: relative;
+        }
+        .liquid-loader::before, .liquid-loader::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            border: 2px solid var(--accent-primary);
+            animation: fluidSpin 3s linear infinite;
+        }
+        .liquid-loader::after {
+            border: 2px solid var(--accent-secondary); opacity: 0.5;
+            animation-direction: reverse; animation-duration: 4s;
+        }
+        .loader-text {
+            margin-top: 30px; font-family: var(--font-tech); font-size: 1rem;
+            color: var(--accent-primary); letter-spacing: 6px;
+        }
+
+        @keyframes fluidSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* === LAYOUT & HEADER === */
+        .app-container {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 2rem 1rem; min-height: 100vh; max-width: 1400px; margin: 0 auto;
+        }
+
+        header { text-align: center; margin-bottom: 2.5rem; animation: fadeInDown 1.5s ease forwards; }
+
+        .brand-title {
+            font-family: var(--font-brand); font-size: 4rem; font-weight: 700;
+            color: transparent; -webkit-text-stroke: 1px var(--accent-primary);
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+            -webkit-background-clip: text; background-clip: text;
+            letter-spacing: 12px; text-transform: uppercase; margin-bottom: 0.5rem;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand-subtitle {
+            font-family: var(--font-body); font-size: 1rem; font-weight: 300;
+            color: var(--text-muted); letter-spacing: 2px;
+        }
+
+        /* === LIQUID GLASS COMPONENTS === */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            border-radius: var(--border-radius);
+            box-shadow: 0 15px 35px var(--glass-shadow);
+        }
+
+        /* === NAVIGATION === */
+        .navbar {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+            padding: 12px 20px; border-radius: 50px; margin-bottom: 2.5rem;
+            z-index: 100; position: sticky; top: 20px;
+        }
+
+        .nav-btn {
+            background: transparent; color: var(--text-main); font-family: var(--font-body);
+            font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;
+            padding: 12px 25px; border: 1px solid transparent; border-radius: 40px;
+            cursor: pointer; transition: var(--transition-smooth); position: relative; overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+            transition: var(--transition-smooth); z-index: -1;
+        }
+
+        .nav-btn:hover::before { left: 100%; }
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255,255,255,0.05); border-color: var(--accent-primary);
+            color: var(--accent-primary); box-shadow: 0 0 20px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,255,255,0.05);
+        }
+        body.theme-light .nav-btn:hover, body.theme-light .nav-btn.active { background: #fff; }
+
+        /* === PANELS CONTAINER === */
+        .panel-container {
+            width: 100%; padding: 3rem; position: relative; overflow: hidden; min-height: 650px;
+        }
+
+        .panel { display: none; animation: liquidFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .panel.active { display: block; }
+
+        .panel-title {
+            font-family: var(--font-heading); font-size: 2.5rem; color: var(--accent-primary);
+            margin-bottom: 2.5rem; position: relative; display: inline-block;
+        }
+        .panel-title::after {
+            content: ''; position: absolute; bottom: -10px; left: 0; width: 50%; height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), transparent);
+        }
+
+        /* === CARDS & BUTTONS === */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+
+        .liquid-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+            border-radius: calc(var(--border-radius) - 5px); padding: 30px;
+            transition: var(--transition-smooth); position: relative; overflow: hidden;
+        }
+        body.theme-light .liquid-card { background: rgba(255,255,255,0.4); }
+
+        .liquid-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, var(--glass-highlight) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.5s ease; pointer-events: none;
+        }
+
+        .liquid-card:hover {
+            transform: translateY(-8px); border-color: var(--accent-primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .liquid-card:hover::before { opacity: 1; }
+
+        .card-value { font-family: var(--font-tech); font-size: 3rem; color: var(--text-main); margin: 15px 0; text-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .card-title { font-size: 0.9rem; color: var(--accent-primary); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+
+        .liquid-btn {
+            background: transparent; border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 15px 30px; border-radius: 30px; cursor: pointer; font-family: var(--font-body);
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 600; font-size: 0.85rem;
+            transition: var(--transition-smooth); width: 100%; margin-top: 20px;
+            display: inline-block; text-align: center; text-decoration: none; position: relative; overflow: hidden;
+            box-shadow: inset 0 0 0 0 var(--accent-primary);
+        }
+        body.theme-light .liquid-btn { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        .liquid-btn:hover {
+            box-shadow: inset 0 0 0 50px var(--accent-primary);
+            color: var(--text-dark); border-color: var(--accent-primary);
+        }
+
+        /* === INTEGRATIONS: HIGH CHIVASKY AI (FORMERLY GEMINI) === */
+        .chat-wrapper {
+            display: flex; flex-direction: column; height: 600px;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius); overflow: hidden;
+        }
+        body.theme-light .chat-wrapper { background: rgba(255,255,255,0.4); }
+
+        .chat-header {
+            padding: 20px 30px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .ai-avatar {
+            width: 45px; height: 45px; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            background: linear-gradient(135deg, var(--accent-primary), transparent);
+            box-shadow: 0 0 20px var(--accent-primary);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--text-dark); font-weight: bold; font-family: var(--font-brand);
+            animation: fluidSpin 5s linear infinite; border: 1px solid var(--glass-highlight);
+        }
+        .ai-status { font-family: var(--font-body); font-size: 0.85rem; color: var(--text-muted); }
+        .ai-status strong { color: var(--accent-primary); font-size: 1.2rem; font-family: var(--font-tech); letter-spacing: 1px; }
+
+        .chat-history {
+            flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;
+        }
+        .chat-history::-webkit-scrollbar { width: 4px; }
+        .chat-history::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+        .msg {
+            max-width: 80%; padding: 18px 25px; border-radius: 20px; font-size: 0.95rem;
+            line-height: 1.7; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); word-wrap: break-word;
+            position: relative; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+        }
+
+        .msg.bot {
+            align-self: flex-start; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border); border-top-left-radius: 5px; color: var(--text-main);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+        }
+        body.theme-light .msg.bot { background: rgba(255,255,255,0.7); }
+
+        .msg.user {
+            align-self: flex-end; background: var(--glass-highlight);
+            border: 1px solid var(--accent-primary); border-top-right-radius: 5px; color: var(--text-main);
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.1);
+        }
+        body.theme-light .msg.user { background: var(--accent-primary); color: #fff; }
+
+        .typing-indicator {
+            align-self: flex-start; font-size: 0.85rem; color: var(--text-muted);
+            font-family: var(--font-tech); display: none; padding: 0 25px; animation: pulse 1.5s infinite;
+        }
+
+        .chat-input-box {
+            display: flex; padding: 20px; border-top: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.2); gap: 15px; align-items: center;
+        }
+
+        .chat-input-box input {
+            flex: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+            border-radius: 30px; padding: 15px 25px; color: var(--text-main);
+            font-family: var(--font-body); font-size: 1rem; outline: none; transition: var(--transition-smooth);
+        }
+        .chat-input-box input:focus { border-color: var(--accent-primary); background: rgba(255,255,255,0.05); }
+        .chat-input-box input::placeholder { color: rgba(255,255,255,0.3); }
+        body.theme-light .chat-input-box input { background: #fff; color: #000; }
+
+        .btn-send-chat {
+            background: transparent; color: var(--accent-primary); border: 1px solid var(--accent-primary);
+            padding: 15px 30px; border-radius: 30px; font-weight: 600; cursor: pointer;
+            text-transform: uppercase; transition: var(--transition-smooth); letter-spacing: 1px;
+        }
+        .btn-send-chat:hover { background: var(--accent-primary); color: var(--text-dark); box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+        /* === INTEGRATIONS: MEDIA (YT / TIKTOK) === */
+        .media-split { display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; }
+        @media(max-width: 950px) { .media-split { grid-template-columns: 1fr; } }
+
+        .yt-section, .tt-section {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+            border-radius: calc(var(--border-radius) - 5px); padding: 25px;
+        }
+
+        .input-group { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        .input-group input {
+            flex: 1; background: transparent; border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 15px 20px; border-radius: 30px; outline: none; font-family: var(--font-body);
+        }
+        .input-group button { margin-top: 0; width: auto; padding: 15px 30px; }
+
+        .iframe-container {
+            position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
+            border-radius: 15px; overflow: hidden; background: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+        }
+        .iframe-container iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:none; }
+
+        .tiktok-container {
+            width: 100%; height: 500px; overflow-y: auto; background: rgba(255,255,255,0.9);
+            border-radius: 15px; padding: 10px;
+        }
+
+        /* === INTEGRATIONS: SOCIAL (FB) === */
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        @media(max-width: 850px) { .social-grid { grid-template-columns: 1fr; } }
+
+        .fb-wrapper {
+            background: #fff; border-radius: calc(var(--border-radius) - 5px); overflow: hidden;
+            display: flex; justify-content: center; padding: 15px; border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* LIQUID GLASS FB BUTTON REPLACING MESSENGER CARD */
+        .liquid-social-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            border-radius: calc(var(--border-radius) - 5px);
+            padding: 50px 30px;
+            text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.02), 0 15px 35px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+        }
+        body.theme-light .liquid-social-card { background: rgba(255,255,255,0.5); }
+
+        .liquid-social-card::before {
+            content: ''; position: absolute; top: -50px; left: -50px; width: 150px; height: 150px;
+            background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+            opacity: 0.1; filter: blur(20px);
+        }
+
+        .liquid-social-card h3 { font-family: var(--font-heading); font-size: 2.2rem; margin-bottom: 20px; color: var(--text-main); }
+        .liquid-social-card p { margin-bottom: 35px; font-size: 1.1rem; color: var(--text-muted); line-height: 1.6; }
+
+        .btn-facebook {
+            background: rgba(24, 119, 242, 0.1); /* FB Blue tinted transparent */
+            color: #1877F2; border: 1px solid #1877F2; padding: 18px 40px; border-radius: 40px;
+            text-decoration: none; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            transition: var(--transition-smooth); display: inline-block; width: 100%; max-width: 300px;
+            position: relative; overflow: hidden; backdrop-filter: blur(5px);
+        }
+        body.theme-light .btn-facebook { background: #1877F2; color: #fff; }
+
+        .btn-facebook:hover {
+            background: #1877F2; color: #fff; box-shadow: 0 10px 30px rgba(24, 119, 242, 0.4);
+            transform: translateY(-3px);
+        }
+
+        /* === SETTINGS / THEME CUSTOMIZER === */
+        .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; }
+
+        .setting-block {
+            background: rgba(255,255,255,0.02); padding: 35px; border-radius: calc(var(--border-radius) - 5px);
+            border: 1px solid var(--glass-border); box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        body.theme-light .setting-block { background: rgba(255,255,255,0.4); }
+
+        .setting-block h3 { margin-bottom: 25px; font-family: var(--font-heading); color: var(--accent-primary); font-size: 1.5rem; }
+
+        .color-picker-group {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            padding: 15px 20px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--glass-border);
+        }
+        body.theme-light .color-picker-group { background: rgba(255,255,255,0.5); }
+        
+        .color-picker-group label { font-size: 0.95rem; font-weight: 500; }
+        .color-picker-group input[type="color"] {
+            border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer;
+            background: transparent; padding: 0;
+        }
+        .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker-group input[type="color"]::-webkit-color-swatch { border: 2px solid var(--glass-highlight); border-radius: 50%; }
+
+        .theme-presets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .preset-btn {
+            padding: 15px 10px; text-align: center; border: 1px solid var(--glass-border); border-radius: 12px;
+            cursor: pointer; transition: var(--transition-smooth); font-weight: 600; font-size: 0.85rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .preset-dark { background: linear-gradient(135deg, #050508, #11141c); color: #D4AF37; }
+        .preset-light { background: linear-gradient(135deg, #eef2f5, #e0e5ec); color: #0047AB; }
+        .preset-plat { background: linear-gradient(135deg, #151517, #252528); color: #E2E2B6; }
+        .preset-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); border-color: var(--glass-highlight); }
+
+        /* === FOOTER === */
+        footer {
+            margin-top: auto; padding: 40px 0; text-align: center; font-family: var(--font-brand);
+            border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.1); backdrop-filter: blur(5px);
+        }
+        footer p:first-child { font-size: 1.5rem; color: var(--text-main); letter-spacing: 4px; }
+        footer p:last-child { font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; font-family: var(--font-body); letter-spacing: 2px; }
+
+        /* === TOAST NOTIFICATION === */
+        #toast-box { position: fixed; bottom: 40px; right: 40px; z-index: 9999; display: flex; flex-direction: column; gap: 15px; }
+        .toast {
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border); border-left: 4px solid var(--accent-primary);
+            color: var(--text-main); padding: 18px 30px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards, fadeOut 0.5s ease 3.5s forwards;
+            font-size: 0.95rem; display: flex; align-items: center; gap: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+        @keyframes liquidFade { from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(5px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(50px); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Nền kính lỏng -->
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Khởi tạo màn hình chờ -->
+    <div id="loader">
+        <div class="liquid-loader"></div>
+        <div class="loader-text">LIQUID CORE INITIALIZING</div>
+    </div>
+
+    <!-- Hệ thống thông báo -->
+    <div id="toast-box"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <h1 class="brand-title">HIGH CHIVASKY</h1>
+            <div class="brand-subtitle">Chơi Respect is key. Không cần quá nghiêm túc nhưng cũng đừng quá đà.</div>
+        </header>
+
+        <!-- Navbar (Glass) -->
+        <nav class="navbar glass-panel">
+            <button class="nav-btn active" onclick="openPanel('dashboard')">Trang chủ</button>
+            <button class="nav-btn" onclick="openPanel('ai-chat')">Trợ lý AI</button>
+            <button class="nav-btn" onclick="openPanel('media')">Truyền thông</button>
+            <button class="nav-btn" onclick="openPanel('social')">Mạng xã hội</button>
+            <button class="nav-btn" onclick="openPanel('settings')">Tùy biến Liquid</button>
+            <button class="nav-btn" onclick="openPanel('contact')">Liên hệ</button>
+        </nav>
+
+        <!-- Container chính -->
+        <main class="panel-container glass-panel">
+            
+            <!-- PANEL: Trang chủ (Dashboard) -->
+            <section id="dashboard" class="panel active">
+                <h2 class="panel-title">Hệ Sinh Thái Doanh Nghiệp</h2>
+                <div class="grid-cards">
+                    <div class="liquid-card">
+                        <div class="card-title">Định giá thương hiệu</div>
+                        <div class="card-value" id="val-brand">$2.4M</div>
+                        <p style="color:var(--text-muted); font-size:0.85rem;">Phân tích thời gian thực</p>
+                    </div>
+                    <div class="liquid-card">
+                        <div class="card-title">Lượt truy vấn AI</div>
+                        <div class="card-value" id="val-ai">14,205</div>
+                        <p style="color:var(--text-muted); font-size:0.85rem;">High Chivasky AI Core</p>
+                    </div>
+                    <div class="liquid-card">
+                        <div class="card-title">Tệp đối tác VIP</div>
+                        <div class="card-value">3,892</div>
+                        <p style="color:var(--text-muted); font-size:0.85rem;">Kết nối mã hóa E2E</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 50px;">
+                    <h3 style="margin-bottom: 25px; font-family: var(--font-heading); color: var(--text-main); font-size: 1.8rem;">Trình điều khiển nhanh</h3>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <button class="liquid-btn" style="width: auto;" onclick="notify('Dữ liệu đang được xuất dưới định dạng bảo mật.', 'success')">Xuất Dữ Liệu</button>
+                        <button class="liquid-btn" style="width: auto;" onclick="notify('Đang đồng bộ hóa khối lượng công việc lên Cloud...')">Đồng Bộ Cloud</button>
+                        <button class="liquid-btn" style="width: auto;" onclick="notify('Hệ thống CRM đã được làm mới.', 'success')">Làm Mới Hệ Thống</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL: AI Chat (Đổi tên theo yêu cầu) -->
+            <section id="ai-chat" class="panel">
+                <h2 class="panel-title">High Chivasky AI (Coming Soon)</h2>
+                <div class="chat-wrapper">
+                    <div class="chat-header">
+                        <div class="ai-avatar">HC</div>
+                        <div class="ai-status">
+                            <strong>HC-AI Neural Core (Beta)</strong><br>
+                            Hệ thống AI độc quyền đang trong giai đoạn thử nghiệm
+                        </div>
+                    </div>
+                    <div class="chat-history" id="chat-history">
+                        <div class="msg bot">Xin chào. Tôi là nguyên mẫu thử nghiệm của hệ thống <b>High Chivasky AI (Coming Soon)</b>. Hiện tại tôi đang thu thập dữ liệu cấu trúc doanh nghiệp và văn hóa thương hiệu để chuẩn bị cho đợt ra mắt chính thức. Tôi có thể giúp gì cho bạn?</div>
+                    </div>
+                    <div class="typing-indicator" id="ai-typing">High Chivasky AI đang phân tích chuỗi dữ liệu...</div>
+                    <div class="chat-input-box">
+                        <input type="text" id="ai-input" placeholder="Giao tiếp với lõi hệ thống..." onkeypress="if(event.key==='Enter') sendAI()">
+                        <button class="btn-send-chat" onclick="sendAI()">TRUY VẤN</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL: Truyền thông (YouTube & TikTok) -->
+            <section id="media" class="panel">
+                <h2 class="panel-title">Trung Tâm Truyền Thông Đa Phương Tiện</h2>
+                <div class="media-split">
+                    <!-- YouTube Module -->
+                    <div class="yt-section">
+                        <h3 style="margin-bottom: 15px; color: var(--text-main); font-family: var(--font-heading); font-size: 1.5rem;">Luồng phát Video (YouTube)</h3>
+                        <div class="input-group">
+                            <input type="text" id="yt-url" placeholder="Dán ID hoặc Link Video YouTube...">
+                            <button class="liquid-btn" onclick="loadYouTube()">TẢI LUỒNG</button>
+                        </div>
+                        <div class="iframe-container">
+                            <iframe id="yt-player" src="https://www.youtube.com/embed/jfKfPfyJRdk?rel=0" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- TikTok Module -->
+                    <div class="tt-section">
+                        <h3 style="margin-bottom: 15px; color: var(--text-main); font-family: var(--font-heading); font-size: 1.5rem;">Nguồn cấp Video Ngắn (TikTok)</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Tích hợp API nhúng trực tiếp chống lỗi CORS.</p>
+                        <div class="tiktok-container" id="tt-container">
+                            <!-- Official TikTok Embed Code -->
+                            <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@tiktok/video/7106594312292453675" data-video-id="7106594312292453675" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@tiktok" href="https://www.tiktok.com/@tiktok?refer=embed">@tiktok</a> </section> </blockquote> 
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL: Mạng xã hội (Cập nhật Facebook theo yêu cầu) -->
+            <section id="social" class="panel">
+                <h2 class="panel-title">Hệ Sinh Thái Mạng Xã Hội</h2>
+                <div class="social-grid">
+                    <!-- Facebook Page Plugin -->
+                    <div>
+                        <h3 style="margin-bottom: 15px; color: var(--text-main); font-family: var(--font-heading); font-size: 1.5rem;">Trang Thông Tin Chính Thức</h3>
+                        <p style="font-size: 0.95rem; margin-bottom: 20px; color: var(--text-muted); line-height: 1.6;">Dữ liệu bảng tin trực tiếp từ Facebook Page (iFrame SDK).</p>
+                        <div class="fb-wrapper">
+                            <!-- Using a public page as placeholder to prevent errors -->
+                            <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook&tabs=timeline&width=340&height=500&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId" width="340" height="500" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+                        </div>
+                    </div>
+
+                    <!-- REPLACED MESSENGER WITH FACEBOOK LINK BUTTON -->
+                    <div>
+                        <h3 style="margin-bottom: 15px; color: var(--text-main); font-family: var(--font-heading); font-size: 1.5rem;">Cổng Giao Tiếp Trực Tuyến</h3>
+                        <p style="font-size: 0.95rem; margin-bottom: 20px; color: var(--text-muted); line-height: 1.6;">Kết nối an toàn tới nền tảng mạng xã hội.</p>
+                        <div class="liquid-social-card">
+                            <h3>FACEBOOK</h3>
+                            <p>Theo dõi, cập nhật tin tức và tương tác trực tiếp với hệ sinh thái cộng đồng của High Chivasky trên Facebook.</p>
+                            <a href="https://www.facebook.com" target="_blank" class="btn-facebook" onclick="notify('Đang điều hướng đến môi trường Facebook...', 'success')">TRUY CẬP FACEBOOK</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PANEL: Cài đặt (Liquid Theme Customizer) -->
+            <section id="settings" class="panel">
+                <h2 class="panel-title">Tùy Biến Giao Diện Liquid Glass</h2>
+                <div class="settings-grid">
+                    
+                    <div class="setting-block">
+                        <h3>Điều Chỉnh Sắc Độ (Custom Colors)</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">Bộ lọc kính lỏng sẽ tự động hòa trộn các dải màu này vào toàn bộ giao diện.</p>
+                        
+                        <div class="color-picker-group">
+                            <label>Sắc độ chính (Accent)</label>
+                            <input type="color" id="color-accent" value="#D4AF37" onchange="updateCustomColor()">
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Sắc độ phụ (Highlight)</label>
+                            <input type="color" id="color-accent-2" value="#F8E9A1" onchange="updateCustomColor()">
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Không gian nền lõi 1</label>
+                            <input type="color" id="color-bg-1" value="#050508" onchange="updateCustomColor()">
+                        </div>
+                        <div class="color-picker-group">
+                            <label>Không gian nền lõi 2</label>
+                            <input type="color" id="color-bg-2" value="#11141c" onchange="updateCustomColor()">
+                        </div>
+                        <button class="liquid-btn" onclick="resetColors()">KHÔI PHỤC BẢN GỐC</button>
+                    </div>
+
+                    <div class="setting-block">
+                        <h3>Hồ Sơ Giao Diện (Theme Presets)</h3>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;">Chuyển đổi nhanh giữa các trạng thái thẩm mỹ doanh nghiệp cấp cao.</p>
+                        <div class="theme-presets">
+                            <div class="preset-btn preset-dark" onclick="applyPreset('dark')">
+                                <span style="font-size: 1.2rem; margin-bottom: 5px;">🌙</span>
+                                Midnight Gold
+                            </div>
+                            <div class="preset-btn preset-light" onclick="applyPreset('light')">
+                                <span style="font-size: 1.2rem; margin-bottom: 5px;">☀️</span>
+                                Corporate Light
+                            </div>
+                            <div class="preset-btn preset-plat" onclick="applyPreset('platinum')">
+                                <span style="font-size: 1.2rem; margin-bottom: 5px;">⚙️</span>
+                                Platinum Tech
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- PANEL: Liên hệ -->
+            <section id="contact" class="panel">
+                <h2 class="panel-title">Mạng Lưới Liên Kết</h2>
+                <div class="setting-block" style="text-align: center; padding: 60px 20px;">
+                    <h3 style="font-family: var(--font-brand); color: var(--accent-primary); font-size: 2.5rem; margin-bottom: 20px;">High Chivasky Network</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem;">Truy cập giao thức liên hệ trực tiếp đến bộ phận quản trị.</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                        <button class="liquid-btn" style="max-width: 400px; font-size: 1.1rem; padding: 20px;" onclick="openLink('https://www.facebook.com/share/183bB8eGpA/')">Trời Mưa Rồi (tsk - kage)</button>
+                        <button class="liquid-btn" style="max-width: 400px; font-size: 1.1rem; padding: 20px;" onclick="openLink('https://www.facebook.com/share/1EC7ufzyHa/')">Leyi Chivasky</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>HIGH CHIVASKY</p>
+            <p>2026 - HC - 36 - 18 • LIQUID GLASS UI ARCHITECTURE</p>
+        </footer>
+    </div>
+
+    <!-- Official TikTok Embed Script -->
+    <script async src="https://www.tiktok.com/embed.js"></script>
+
+    <script>
+        // === KHỞI TẠO HỆ THỐNG LIQUID GLASS ===
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.visibility = 'hidden';
+                    notify('Module Liquid Glass đã được nạp hoàn tất.', 'success');
+                }, 1000);
+            }, 2500);
+            
+            // Randomize Dashboard Stats
+            setInterval(() => {
+                const valAi = document.getElementById('val-ai');
+                if(Math.random() > 0.4) {
+                    let aiNum = parseInt(valAi.innerText.replace(/,/g, '')) + Math.floor(Math.random() * 8);
+                    valAi.innerText = aiNum.toLocaleString();
+                }
+            }, 3500);
+        });
+
+        // === CHUYỂN ĐỔI TAB (PANELS) ===
+        function openPanel(panelId) {
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+        }
+
+        // === HỆ THỐNG THÔNG BÁO (TOAST) ===
+        function notify(msg, type='info') {
+            const box = document.getElementById('toast-box');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if(type === 'error') toast.style.borderLeftColor = '#ff3333';
+            if(type === 'success') toast.style.borderLeftColor = '#33ff77';
+            
+            // Icon cho toast
+            let icon = '⚡';
+            if(type === 'error') icon = '❌';
+            if(type === 'success') icon = '✅';
+
+            toast.innerHTML = `<span style="font-size: 1.2rem;">${icon}</span> <span><b>[HỆ THỐNG]:</b> ${msg}</span>`;
+            box.appendChild(toast);
+            setTimeout(() => { if(box.contains(toast)) box.removeChild(toast); }, 4000);
+        }
+
+        // === MỞ LINK ===
+        function openLink(url) {
+            notify('Đang định tuyến an toàn tới cổng kết nối bên ngoài...');
+            setTimeout(() => window.open(url, '_blank'), 800);
+        }
+
+        // === CHỨC NĂNG YOUTUBE ===
+        function loadYouTube() {
+            const input = document.getElementById('yt-url').value.trim();
+            if (!input) { notify("Truy vấn trống. Vui lòng nhập link.", "error"); return; }
+            
+            let videoId = input;
+            const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const match = input.match(ytRegex);
+            
+            if (match && match[1]) { videoId = match[1]; } 
+            else if (input.length !== 11) { notify("Lỗi giải mã: Định dạng URL YouTube không đúng.", "error"); return; }
+
+            const player = document.getElementById('yt-player');
+            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            notify("Kết nối luồng Media thành công.", "success");
+        }
+
+        // === TÙY BIẾN LIQUID GLASS MÀU SẮC ===
+        const root = document.documentElement;
+
+        function updateCustomColor() {
+            const c1 = document.getElementById('color-accent').value;
+            const c2 = document.getElementById('color-accent-2').value;
+            const bg1 = document.getElementById('color-bg-1').value;
+            const bg2 = document.getElementById('color-bg-2').value;
+
+            root.style.setProperty('--accent-primary', c1);
+            root.style.setProperty('--accent-secondary', c2);
+            root.style.setProperty('--bg-color-1', bg1);
+            root.style.setProperty('--bg-color-2', bg2);
+            
+            // Hàm chuyển hex sang rgba để làm màu blob lỏng
+            const hexToRgbA = (hex, alpha) => {
+                let c;
+                if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+                    c= hex.substring(1).split('');
+                    if(c.length== 3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+                    c= '0x'+c.join('');
+                    return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+','+alpha+')';
+                }
+                return `rgba(255,255,255,${alpha})`;
+            }
+
+            root.style.setProperty('--liquid-blob-1', hexToRgbA(c1, 0.2));
+            root.style.setProperty('--liquid-blob-2', hexToRgbA(bg2, 0.3));
+            root.style.setProperty('--liquid-blob-3', hexToRgbA(c2, 0.15));
+
+            document.body.className = '';
+            notify('Ma trận màu Liquid đã được cập nhật.', 'success');
+        }
+
+        function resetColors() {
+            document.getElementById('color-accent').value = '#D4AF37';
+            document.getElementById('color-accent-2').value = '#F8E9A1';
+            document.getElementById('color-bg-1').value = '#050508';
+            document.getElementById('color-bg-2').value = '#11141c';
+            
+            root.style.removeProperty('--accent-primary');
+            root.style.removeProperty('--accent-secondary');
+            root.style.removeProperty('--bg-color-1');
+            root.style.removeProperty('--bg-color-2');
+            root.style.removeProperty('--liquid-blob-1');
+            root.style.removeProperty('--liquid-blob-2');
+            root.style.removeProperty('--liquid-blob-3');
+            
+            document.body.className = '';
+            notify('Đã khôi phục trạng thái Midnight Gold mặc định.');
+        }
+
+        function applyPreset(theme) {
+            document.body.className = ''; 
+            if(theme !== 'dark') { document.body.classList.add(`theme-${theme}`); }
+            
+            root.style.removeProperty('--accent-primary');
+            root.style.removeProperty('--bg-color-1');
+            root.style.removeProperty('--bg-color-2');
+            root.style.removeProperty('--liquid-blob-1');
+            root.style.removeProperty('--liquid-blob-2');
+            root.style.removeProperty('--liquid-blob-3');
+            
+            notify(`Đã kích hoạt hồ sơ thẩm mỹ: ${theme.toUpperCase()}`);
+        }
+
+        // === HIGH CHIVASKY AI (COMING SOON) - LOGIC MÔ PHỎNG ===
+        async function sendAI() {
+            const inputField = document.getElementById('ai-input');
+            const text = inputField.value.trim();
+            if(!text) return;
+
+            appendMsg(text, 'user');
+            inputField.value = '';
+            
+            const indicator = document.getElementById('ai-typing');
+            indicator.style.display = 'block';
+
+            // Độ trễ giả lập logic xử lý
+            const latency = 1200 + (Math.random() * 2000) + (text.length * 8);
+
+            const reply = await generateHC_AIResponse(text);
+
+            setTimeout(() => {
+                indicator.style.display = 'none';
+                appendMsg(reply, 'bot');
+            }, latency);
+        }
+
+        function appendMsg(text, sender) {
+            const hist = document.getElementById('chat-history');
+            const div = document.createElement('div');
+            div.className = `msg ${sender}`;
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            hist.appendChild(div);
+            hist.scrollTop = hist.scrollHeight;
+        }
+
+        // Logic của HC-AI (Tập trung vào tính chất "Coming Soon" và thương hiệu)
+        async function generateHC_AIResponse(query) {
+            const q = query.toLowerCase();
+            
+            if(q.includes('chào') || q.includes('hello')) {
+                return "Chào bạn. Tôi là **High Chivasky AI**. Hiện tại dự án trí tuệ nhân tạo này đang trong giai đoạn 'Coming Soon'. Tôi được thiết lập để trả lời các cấu trúc cơ bản trước khi ra mắt bản chính thức.";
+            }
+            
+            if(q.includes('chivasky') || q.includes('thương hiệu')) {
+                return "High Chivasky là một hệ sinh thái tôn trọng cá tính. \n\n*Respect is key. Không cần quá nghiêm túc nhưng cũng đừng quá đà.*\n\nGiao diện Liquid Glass này là minh chứng cho sự nâng cấp liên tục của chúng tôi.";
+            }
+
+            if(q.includes('ai') || q.includes('khi nào') || q.includes('ra mắt')) {
+                return "Dự án **High Chivasky AI** đang được huấn luyện nội bộ dựa trên các tập dữ liệu doanh nghiệp và văn hóa thời trang. Chúng tôi sẽ thông báo khi lõi xử lý (Neural Core) hoàn thiện 100%. Mọi phiên bản cũ (như bản tích hợp nền tảng khác) đã bị thay thế.";
+            }
+
+            if(q.includes('mạng xã hội') || q.includes('facebook') || q.includes('kết nối')) {
+                return "Bạn có thể sử dụng bảng điều khiển 'Mạng xã hội' ở thanh menu trên cùng. Chúng tôi đã thiết lập sẵn luồng kết nối trực tiếp đến trang Facebook chính thức của High Chivasky ở đó.";
+            }
+
+            const fallbacks =[
+                "[BETA LOG]: Câu lệnh của bạn đã được ghi nhận vào kho dữ liệu học máy của High Chivasky AI để cải thiện phiên bản chính thức (Coming Soon).",
+                "Phân tích dữ liệu... Hiện tại tính năng trả lời chuyên sâu đang bị khóa trong bản thử nghiệm này. Vui lòng chờ bản cập nhật High Chivasky AI tiếp theo.",
+                "Thẩm mỹ Liquid Glass và tư duy Respect is Key là cốt lõi của chúng tôi. Yêu cầu của bạn phù hợp với định hướng này.",
+                "Tôi đang ở trạng thái 'Coming Soon'. Hãy trải nghiệm các tính năng truyền thông hoặc đổi màu giao diện trong lúc chờ đợi nhé."
+            ];
+
+            return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        }
+
+    </script>
+</body>
+</html>
